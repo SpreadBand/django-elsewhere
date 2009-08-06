@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django import forms
+from django.db import connection
 from django.db import models
 from django.core.cache import cache
 from django.contrib import admin
@@ -52,8 +53,9 @@ def SocialNetworkData():
 
     if not data:
         data = []
+        seen_model = connection.introspection.installed_models(['elsewhere_socialnetwork'])
 
-        try:
+        if seen_model:
             for network in SocialNetwork.objects.all():
                 data.append({
                     'id': slugify(network.name),
@@ -63,30 +65,24 @@ def SocialNetworkData():
                     'icon': network.icon
                 })
             cache.set(cache_key, data, 60*60*24)
-        except:
-            # if we haven't yet synced the database, don't worry about this yet
-            pass
 
     return data
 
 def InstantMessengerData():
     cache_key = IM_CACHE_KEY
     data = cache.get(cache_key)
-
-    if not data:
+    seen_model = connection.introspection.installed_models(['elsewhere_instantmessenger'])
+    
+    if seen_model:
         data = []
-        try:
-            for network in InstantMessenger.objects.all():
-                data.append({
-                    'id': slugify(network.name),
-                    'name': network.name,
-                    'url': network.url,
-                    'icon': network.icon
-                })
-            cache.set(cache_key, data, 60*60*24)
-        except:
-            # if we haven't yet synced the database, don't worry about this yet
-            pass
+        for network in InstantMessenger.objects.all():
+            data.append({
+                'id': slugify(network.name),
+                'name': network.name,
+                'url': network.url,
+                'icon': network.icon
+            })
+        cache.set(cache_key, data, 60*60*24)
 
     return data
 
