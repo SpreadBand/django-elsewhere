@@ -19,7 +19,7 @@ class Network(models.Model):
     """ Model for storing networks. """
 
     name = models.CharField(max_length=100)
-    url = models.URLField()
+    url = models.URLField(verify_exists=False)
     identifier = models.CharField(max_length=100)
     icon = models.CharField(max_length=100, blank=True)
 
