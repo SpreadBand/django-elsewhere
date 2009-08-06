@@ -92,7 +92,10 @@ class ProfileManager:
 
     def _get_choices(self):
         """ List of choices for profile select fields. """
-        return [(props['id'], props['name']) for props in self.data]
+        # following line throws TypeError: 'NoneType' object is not iterable
+        # return [(props['id'], props['name']) for props in self.data]
+        # dirty fix so syncdb completes
+        return None
     choices = property(_get_choices)
 
 class SocialNetworkManager(ProfileManager):
