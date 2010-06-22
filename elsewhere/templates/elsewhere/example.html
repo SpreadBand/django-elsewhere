@@ -10,13 +10,13 @@
 <h1>Elsewhere</h1>
 
 <h2>Social Networks</h2>
-{% if request.user.social_network_profiles.all %}
+{% if user.social_network_profiles.all %}
     <ul>
-    {% for profile in request.user.social_network_profiles.all %}
+    {% for profile in user.social_network_profiles.all %}
         <li>
             <img src="{{ profile.icon }}" alt="{{ profile.name }}">
             <a href="{{ profile.url }}" rel="me">{{ profile.name }}</a>
-            <form id="delete-network-{{ profile.id }}" method="post" action=".">
+            <form id="delete-network-{{ profile.id }}" method="post" action=".">{% csrf_token %}
                 <input type="hidden" name="delete_id" value="{{ profile.id }}">
                 <input type="submit" name="delete-sn-form" value="Delete" class="button">
             </form>
@@ -28,7 +28,7 @@
 {% endif %}
 
 <h3>Add a Social Network</h3>
-<form method="post" action=".">
+<form method="post" action=".">{% csrf_token %}
     {{ sn_form.as_p }}
     <p><input type="submit" name="sn-form" value="Add Social Network" class="button"></p>
 </form>
@@ -36,13 +36,13 @@
 <br>
 
 <h2>Instant Messengers</h2>
-{% if request.user.instant_messenger_profiles.all %}
+{% if user.instant_messenger_profiles.all %}
     <ul>
-    {% for profile in request.user.instant_messenger_profiles.all %}
+    {% for profile in user.instant_messenger_profiles.all %}
         <li>
             <img src="{{ profile.icon }}" alt="{{ profile.name }}">
             {{ profile.name }}: <a href="{{ profile.url }}">{{ profile.username }}</a>
-            <form id="delete-messenger-{{ profile.id }}" method="post" action=".">
+            <form id="delete-messenger-{{ profile.id }}" method="post" action=".">{% csrf_token %}
                 <input type="hidden" name="delete_id" value="{{ profile.id }}">
                 <input type="submit" name="delete-im-form" value="Delete" class="button">
             </form>
@@ -54,7 +54,7 @@
 {% endif %}
 
 <h3>Add an Instant Messenger</h3>
-<form method="post" action=".">
+<form method="post" action=".">{% csrf_token %}
     {{ im_form.as_p }}
     <p><input type="submit" name="im-form" value="Add Instant Messenger" class="button"></p>
 </form>
@@ -62,13 +62,13 @@
 <br>
 
 <h2>Websites</h2>
-{% if request.user.website_profiles.all %}
+{% if user.website_profiles.all %}
     <ul>
-    {% for profile in request.user.website_profiles.all %}
+    {% for profile in user.website_profiles.all %}
         <li>
             <img src="{{ profile.icon }}" alt="{{ profile.name }}">
             <a href="{{ profile.url }}" rel="me">{{ profile.name }}</a>
-            <form id="delete-website-{{ profile.id }}" method="post" action=".">
+            <form id="delete-website-{{ profile.id }}" method="post" action=".">{% csrf_token %}
                 <input type="hidden" name="delete_id" value="{{ profile.id }}">
                 <input type="submit" name="delete-w-form" value="Delete" class="button">
             </form>
@@ -80,7 +80,7 @@
 {% endif %}
 
 <h3>Add a Website</h3>
-<form method="post" action=".">
+<form method="post" action=".">{% csrf_token %}
     {{ w_form.as_p }}
     <p><input type="submit" name="w-form" value="Add Website" class="button"></p>
 </form>
