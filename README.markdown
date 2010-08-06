@@ -3,6 +3,9 @@ django-elsewhere - Social Network Links for Django
 
 Formerly Django-PSN (Portable Social Networks) and originally created for Pownce.
 
+This version of django-elsewhere allows any object to be linked to
+external network by using a generic foreign key.
+
 Authors:
 ------------
 * [Leah Culver] (http://leahculver.com)
@@ -13,7 +16,8 @@ Authors:
 Install:
 ------------
 
-1. You can get the source directly from GitHub either by downloading the project or checking out the repository: 'git clone git://github.com/leah/django-elsewhere.git'
+1. You can get the source directly from GitHub either by downloading
+the project or checking out the repository: 'git clone git://github.com/SpreadBand/django-elsewhere.git'
 
 2. After checking the project out, add the 'elsewhere' directory to your Python path.
 
@@ -24,8 +28,8 @@ Install:
 About:
 ------------
 
-Django-elsewhere allows users of a website to provide and display information about their 
-other online social networks. The project was created to let Pownce users 
+Django-elsewhere any objects of a website te be linked with information about their 
+related online social networks. The project was created to let Pownce users 
 show their friends what other online social networks they participate in. 
 The hyperlinks to other profiles make use of the XFN rel="me" standard [http://www.gmpg.org/xfn/] (http://www.gmpg.org/xfn/), 
 which enables auto-discovery of social network profiles which the user has chosen to consolidate 
@@ -112,7 +116,7 @@ and/or INSTANT_MESSENGERS lists to your settings:
     ]
 
 If no SOCIAL_NETWORKS or INSTANT_MESSENGERS are defined in your project settings, django-elsewhere will
-default to using the lists in fatty_lists.py.
+default to using the lists in default_lists.py.
 
 Other resources:
 ----------------
