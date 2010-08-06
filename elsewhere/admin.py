@@ -16,7 +16,7 @@ class WebsiteProfileAdmin(ProfileAdmin):
 
 ## TODO Not sure why I can't grab date_added from the parent Profile model, need to figure this out.
 
-admin.site.register(Network)
+admin.site.register(SocialNetwork)
 admin.site.register(SocialNetworkProfile, SocialNetworkProfileAdmin)
 admin.site.register(WebsiteProfile, WebsiteProfileAdmin)
 admin.site.register(InstantMessengerProfile, InstantMessengerProfileAdmin)

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django import forms
+from django.db import connection
 from django.db import models
 from django.core.cache import cache
 from django.contrib import admin
@@ -18,7 +19,7 @@ class Network(models.Model):
     """ Model for storing networks. """
 
     name = models.CharField(max_length=100)
-    url = models.URLField()
+    url = models.URLField(verify_exists=False)
     identifier = models.CharField(max_length=100)
     icon = models.CharField(max_length=100, blank=True)
 
@@ -52,8 +53,9 @@ def SocialNetworkData():
 
     if not data:
         data = []
+        seen_model = connection.introspection.installed_models(['elsewhere_socialnetwork'])
 
-        try:
+        if seen_model:
             for network in SocialNetwork.objects.all():
                 data.append({
                     'id': slugify(network.name),
@@ -63,30 +65,24 @@ def SocialNetworkData():
                     'icon': network.icon
                 })
             cache.set(cache_key, data, 60*60*24)
-        except:
-            # if we haven't yet synced the database, don't worry about this yet
-            pass
 
     return data
 
 def InstantMessengerData():
     cache_key = IM_CACHE_KEY
     data = cache.get(cache_key)
-
-    if not data:
+    seen_model = connection.introspection.installed_models(['elsewhere_instantmessenger'])
+    
+    if seen_model:
         data = []
-        try:
-            for network in InstantMessenger.objects.all():
-                data.append({
-                    'id': slugify(network.name),
-                    'name': network.name,
-                    'url': network.url,
-                    'icon': network.icon
-                })
-            cache.set(cache_key, data, 60*60*24)
-        except:
-            # if we haven't yet synced the database, don't worry about this yet
-            pass
+        for network in InstantMessenger.objects.all():
+            data.append({
+                'id': slugify(network.name),
+                'name': network.name,
+                'url': network.url,
+                'icon': network.icon
+            })
+        cache.set(cache_key, data, 60*60*24)
 
     return data
 
@@ -96,7 +92,10 @@ class ProfileManager:
 
     def _get_choices(self):
         """ List of choices for profile select fields. """
-        return [(props['id'], props['name']) for props in self.data]
+        # following line throws TypeError: 'NoneType' object is not iterable
+        # return [(props['id'], props['name']) for props in self.data]
+        # dirty fix so syncdb completes
+        return None
     choices = property(_get_choices)
 
 class SocialNetworkManager(ProfileManager):

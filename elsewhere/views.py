@@ -27,9 +27,6 @@ def example(request):
                 profile.user = request.user
                 profile.save()
                 return HttpResponseRedirect(request.path)
-            else:
-                ## TODO should probably show the errors
-                print form.errors
 
         # Delete forms
         elif new_data.get('delete-sn-form') or new_data.get('delete-im-form') or new_data.get('delete-w-form'):
