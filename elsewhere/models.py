@@ -4,11 +4,13 @@ from django import forms
 from django.db import connection
 from django.db import models
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 from django.contrib import admin
-from django.contrib.auth.models import User
+from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
-from django.core.urlresolvers import reverse
+
 
 GOOGLE_PROFILE_URL = 'http://www.google.com/s2/favicons?domain_url=%s'
 SN_CACHE_KEY = 'elsewhere_sn_data'
@@ -16,15 +18,16 @@ IM_CACHE_KEY = 'elsewhere_im_data'
 
 
 class Network(models.Model):
-    """ Model for storing networks. """
+    """ 
+    Model for storing networks. 
+    """
+    class Meta:
+        abstract = True
 
     name = models.CharField(max_length=100)
     url = models.URLField(verify_exists=False)
     identifier = models.CharField(max_length=100)
     icon = models.CharField(max_length=100, blank=True)
-
-    class Meta:
-        abstract = True
 
     def __unicode__(self):
         return self.name
@@ -87,11 +90,15 @@ def InstantMessengerData():
     return data
 
 class ProfileManager:
-    """ Handle raw data for lists of profiles."""
+    """
+    Handle raw data for lists of profiles.
+    """
     data = {}
 
     def _get_choices(self):
-        """ List of choices for profile select fields. """
+        """
+        List of choices for profile select fields. 
+        """
         # following line throws TypeError: 'NoneType' object is not iterable
         # return [(props['id'], props['name']) for props in self.data]
         # dirty fix so syncdb completes
@@ -100,22 +107,26 @@ class ProfileManager:
 
 class SocialNetworkManager(ProfileManager):
     data = SocialNetworkData()
+
 sn_manager = SocialNetworkManager()
 
 class InstantMessengerManager(ProfileManager):
     data = InstantMessengerData()
+
 im_manager = InstantMessengerManager()
 
 class Profile(models.Model):
-    """ Common profile model pieces. """
+    """
+    Common profile model pieces. 
+    """
     data_manager = None
+
+    class Meta:
+        abstract = True
 
     date_added = models.DateTimeField(_('date added'), auto_now_add=True)
     date_verified = models.DateTimeField(_('date verified'), default=datetime.now)
     is_verified = models.BooleanField(default=False)
-
-    class Meta:
-        abstract = True
 
     def _get_data_item(self):
         # Find profile data for this profile id
@@ -152,7 +163,10 @@ class Profile(models.Model):
 class SocialNetworkProfile(Profile):
     data_manager = sn_manager
 
-    user = models.ForeignKey(User, db_index=True, related_name='social_network_profiles')
+    content_type = models.ForeignKey(ContentType, related_name='social_network_profiles')
+    object_id = models.PositiveIntegerField(db_index=True)
+    object = generic.GenericForeignKey('content_type', 'object_id')
+
     network_id = models.CharField(max_length=16, choices=data_manager.choices, db_index=True)
     username = models.CharField(max_length=64)
     
@@ -160,7 +174,6 @@ class SocialNetworkProfile(Profile):
         return self.network_id
 
 class SocialNetworkForm(forms.ModelForm):
-
     class Meta:
         model = SocialNetworkProfile
         fields = ('network_id', 'username')
@@ -169,7 +182,10 @@ class SocialNetworkForm(forms.ModelForm):
 class InstantMessengerProfile(Profile):
     data_manager = im_manager
 
-    user = models.ForeignKey(User, db_index=True, related_name='instant_messenger_profiles')
+    content_type = models.ForeignKey(ContentType, related_name='instant_messenger_profiles')
+    object_id = models.PositiveIntegerField(db_index=True)
+    object = generic.GenericForeignKey('content_type', 'object_id')
+
     network_id = models.CharField(max_length=16, choices=data_manager.choices, db_index=True)
     username = models.CharField(max_length=64)
 
@@ -177,14 +193,16 @@ class InstantMessengerProfile(Profile):
         return self.username
 
 class InstantMessengerForm(forms.ModelForm):
-
     class Meta:
         model = InstantMessengerProfile
         fields = ('network_id', 'username')
 
 
 class WebsiteProfile(models.Model):
-    user = models.ForeignKey(User, db_index=True, related_name='website_profiles')
+    content_type = models.ForeignKey(ContentType, related_name='website_profiles')
+    object_id = models.PositiveIntegerField(db_index=True)
+    object = generic.GenericForeignKey('content_type', 'object_id')
+
     name = models.CharField(max_length=64)
     url = models.URLField(verify_exists=True)
 
@@ -198,7 +216,6 @@ class WebsiteProfile(models.Model):
 
 
 class WebsiteForm(forms.ModelForm):
-
     class Meta:
         model = WebsiteProfile
         fields = ('name', 'url')
