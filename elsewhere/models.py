@@ -18,7 +18,7 @@ IM_CACHE_KEY = 'elsewhere_im_data'
 
 class Network(models.Model):
     """ 
-    Model for storing networks. 
+    Abstract model for storing networks. 
     """
     class Meta:
         abstract = True
@@ -27,6 +27,15 @@ class Network(models.Model):
     url = models.URLField(verify_exists=False)
     identifier = models.CharField(max_length=100)
     icon = models.CharField(max_length=100, blank=True)
+
+    @property
+    def icon_url(self):
+        """
+        Icon URL or link to Google icon service
+        """
+        if self.icon:
+            return reverse('elsewhere_img', args=[self.icon])
+        return GOOGLE_PROFILE_URL % self.url
 
     def __unicode__(self):
         return self.name
@@ -47,78 +56,27 @@ class InstantMessenger(Network):
         cache.delete(IM_CACHE_KEY)
         super(InstantMessenger, self).save(*args, **kwargs)
 
-# the following makes the social / IM networks data act as lists.
-
-def SocialNetworkData():
-    cache_key = SN_CACHE_KEY
-    data = cache.get(cache_key)
-
-    if not data:
-        data = []
-        seen_model = connection.introspection.installed_models(['elsewhere_socialnetwork'])
-
-        if seen_model:
-            for network in SocialNetwork.objects.all():
-                data.append({
-                    'id': slugify(network.name),
-                    'name': network.name,
-                    'url': network.url,
-                    'identifier': network.identifier,
-                    'icon': network.icon
-                })
-            cache.set(cache_key, data, 60*60*24)
-
-    return data
-
-def InstantMessengerData():
-    cache_key = IM_CACHE_KEY
-    data = cache.get(cache_key)
-    seen_model = connection.introspection.installed_models(['elsewhere_instantmessenger'])
-    
-    if seen_model:
-        data = []
-        for network in InstantMessenger.objects.all():
-            data.append({
-                'id': slugify(network.name),
-                'name': network.name,
-                'url': network.url,
-                'icon': network.icon
-            })
-        cache.set(cache_key, data, 60*60*24)
-
-    return data
-
-class ProfileManager:
+#-- Object Managers for Profiles
+class ProfileManager(models.Manager):
     """
-    Handle raw data for lists of profiles.
+    Manager for Profiles
     """
-    data = {}
-
-    def _get_choices(self):
+    def get_for_object(self, obj):
         """
-        List of choices for profile select fields. 
+        Create a queryset matching all profiles associated with the given
+        object.
         """
-        # following line throws TypeError: 'NoneType' object is not iterable
-        # return [(props['id'], props['name']) for props in self.data]
-        # dirty fix so syncdb completes
-        return None
-    choices = property(_get_choices)
+        ctype = ContentType.objects.get_for_model(obj)
+        return self.filter(content_type__pk=ctype.pk,
+                           object_id=obj.pk)
 
-class SocialNetworkManager(ProfileManager):
-    data = SocialNetworkData()
 
-sn_manager = SocialNetworkManager()
-
-class InstantMessengerManager(ProfileManager):
-    data = InstantMessengerData()
-
-im_manager = InstantMessengerManager()
-
+#-- Profiles
 class Profile(models.Model):
     """
     Common profile model pieces. 
     """
-    data_manager = None
+    objects = ProfileManager()
 
     class Meta:
         abstract = True
@@ -127,67 +85,54 @@ class Profile(models.Model):
     date_verified = models.DateTimeField(_('date verified'), default=datetime.now)
     is_verified = models.BooleanField(default=False)
 
-    def _get_data_item(self):
-        # Find profile data for this profile id
-        for network in self.data_manager.data:
-            if network['id'] == self.network_id:
-                return network
-        return None
-    data_item = property(_get_data_item)
 
-    def _get_name(self):
-        # Profile display name
-        return self.data_item['name']
-    name = property(_get_name)
- 
-    def _get_url(self):
-        # Profile URL with username
-        return self.data_item['url'] % self.username
-    url = property(_get_url)
+class NetworkProfile(Profile):
+    """
+    Abstract profile for a network provided by a known third-party
+    """
+    class Meta:
+        abstract = True
+
+    username = models.CharField(max_length=64)
+
+    @property
+    def url(self):
+        """
+        Profile URL with username
+        """
+        return "%s%s" % (self.network.url, self.username)
+
+    def __unicode__(self):
+        return "%s profile for %s" % (self.network,
+                                      self.object)
     
-    def _get_icon_name(self):
-        # Icon name
-        return self.data_item['icon']
-    icon_name = property(_get_icon_name)
- 
-    def _get_icon(self):
-        # Icon URL or link to Google icon service
-        if self.icon_name:
-            print reverse('elsewhere_img', args=[self.icon_name])
-            print self.icon_name
-            return reverse('elsewhere_img', args=[self.icon_name])
-        return GOOGLE_PROFILE_URL % self.url
-    icon = property(_get_icon)
 
-class SocialNetworkProfile(Profile):
-    data_manager = sn_manager
-
+class SocialNetworkProfile(NetworkProfile):
+    """
+    A profile for a social network
+    """
     content_type = models.ForeignKey(ContentType, related_name='social_network_profiles')
     object_id = models.PositiveIntegerField(db_index=True)
     object = generic.GenericForeignKey('content_type', 'object_id')
 
-    network_id = models.CharField(max_length=16, choices=data_manager.choices, db_index=True)
-    username = models.CharField(max_length=64)
-    
-    def __unicode__(self):
-        return self.network_id
+    network = models.ForeignKey(SocialNetwork, related_name='profiles')
 
 
-class InstantMessengerProfile(Profile):
-    data_manager = im_manager
-
+class InstantMessengerProfile(NetworkProfile):
+    """
+    A profile for an instant messenging network
+    """
     content_type = models.ForeignKey(ContentType, related_name='instant_messenger_profiles')
     object_id = models.PositiveIntegerField(db_index=True)
     object = generic.GenericForeignKey('content_type', 'object_id')
 
-    network_id = models.CharField(max_length=16, choices=data_manager.choices, db_index=True)
-    username = models.CharField(max_length=64)
-
-    def __unicode__(self):
-        return self.username
+    network = models.ForeignKey(InstantMessenger, related_name='profiles')
 
 
-class WebsiteProfile(models.Model):
+class WebsiteProfile(Profile):
+    """
+    A profile for an external, generic website
+    """
     content_type = models.ForeignKey(ContentType, related_name='website_profiles')
     object_id = models.PositiveIntegerField(db_index=True)
     object = generic.GenericForeignKey('content_type', 'object_id')
@@ -195,10 +140,10 @@ class WebsiteProfile(models.Model):
     name = models.CharField(max_length=64)
     url = models.URLField(verify_exists=True)
 
-    def __unicode__(self):
-        return self.url
-
     @property
-    def icon(self):
+    def icon_url(self):
         # No known icons! Just return the Google service URL.
         return GOOGLE_PROFILE_URL % self.url
+
+    def __unicode__(self):
+        return self.url
