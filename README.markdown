@@ -1,7 +1,7 @@
 django-elsewhere - Social Network Links for Django
 ===================================
 
-Formerly Django-PSN (Portable Social Networks) and originally created for Pownce.
+Based on Leah Culver's django-elsewhere, formerly Django-PSN (Portable Social Networks).
 
 This version of django-elsewhere allows any object to be linked to
 external network by using a generic foreign key.
@@ -10,7 +10,9 @@ Authors:
 ------------
 * [Leah Culver] (http://leahculver.com)
 * [Chris Drackett] (http://chrisdrackett.com/)
-* Please send feedback to leah@sixapart.com
+* [Guillaume Libersat] (http://spreadband.com)
+
+* Please send feedback to guillaume@spreadband.com
 
 
 Install:
@@ -53,15 +55,40 @@ Add the following to your urlconf:
 For sample templates add the path to elsewhere/templates to your TEMPLATE_DIRS setting.
 
 
+To use the template tags:
+-------------------------
+
+There are three tags available:
+
+* For social networks : socialnetworks_for_object
+* For instant messengers : instantmessengers_for_object
+* For websites : websites_for_object
+
+Example:
+
+    <ul>
+    {% socialnetworks_for_object band as socialnetworks %}
+
+    {% for socialnetwork in socialnetworks %}
+    <li>
+      <img src="{{ socialnetwork.network.icon_url }}">
+      <a href="{{ socialnetwork.url }}">{{ socialnetwork.username }}</a>
+    </li>
+    {% endfor %}
+    </ul>
+
+
 To use the icons:
 ------------------------
 
-Each profile object has an icon property that will render the icon while in DEBUG mode.
+Each network object has an icon_url property that will render the icon
 Just use:
 
-    {{ profile.icon }}
+    {{ profile.network.icon_url }}
 
 To enable the icons in production, you'll need to point your webserver to the icon directory.
+
+This is controlled by the ELSEWHERE_MEDIA_DIR environement variable, which defaults to "/images/elsewhere/".
 The default path to an icon is like: /elsewhere/img/vox.png
 
 

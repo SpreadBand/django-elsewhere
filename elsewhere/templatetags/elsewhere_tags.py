@@ -1,6 +1,6 @@
 from django import template
 
-from elsewhere.models import SocialNetworkProfile, InstantMessengerProfile
+from elsewhere.models import SocialNetworkProfile, InstantMessengerProfile, WebsiteProfile
 
 register = template.Library()
 
@@ -25,11 +25,11 @@ class SocialNetworkProfilesForObjectNode(BaseForObjectNode):
 
 class InstantMessengerProfilesForObjectNode(BaseForObjectNode):
     def _get_context(self, context):
-        return InstantMessengerProfile.get_for_object(self.obj.resolve(context))
+        return InstantMessengerProfile.objects.get_for_object(self.obj.resolve(context))
 
 class WebsiteProfileForObjectNode(BaseForObjectNode):
-    def _get_context(self, user):
-        return user.website_profiles.all()
+    def _get_context(self, context):
+        return WebsiteProfile.objects.get_for_object(self.obj.resolve(context))
 
 
 def do_socialnetworks_for_object(parser, token):
@@ -53,7 +53,7 @@ def do_socialnetworks_for_object(parser, token):
     return SocialNetworkProfilesForObjectNode(obj, context_var)
 
 
-def do_elsewhere_messengers(parser, token):
+def do_instantmessengers_for_object(parser, token):
     """
     Retrieves a list of ``InstantMessengerProfile`` objects associated with 
     a given object and stores them in a context variable.
@@ -68,34 +68,35 @@ def do_elsewhere_messengers(parser, token):
 
     """
     try:
-        tag_name, user, as_string, result_var = token.split_contents()
+        tag_name, obj, as_string, context_var = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError, "%r tag requires exactly three arguments" % token.contents.split()[0]
-    return ElsewhereMessengers(user, result_var)
+    return InstantMessengerProfilesForObjectNode(obj, context_var)
 
-def do_elsewhere_websites(parser, token):
+def do_websites_for_object(parser, token):
     """
     Retrieves a list of ``WebsiteProfile`` objects associated with 
-    a given user and stores them in a context variable.
+    a given object and stores them in a context variable.
 
     Usage::
 
-       {% elsewhere_websites [user] as [varname] %}
+       {% elsewhere_websites [object] as [varname] %}
 
     Examples::
 
        {% elsewhere_websites request.user as user_websites %}
 
     """
+
     try:
         tag_name, user, as_string, result_var = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError, "%r tag requires exactly three arguments" % token.contents.split()[0]
-    return ElsewhereWebsites(user, result_var)
+    return WebsiteProfileForObjectNode(user, result_var)
 
 register.tag('socialnetworks_for_object', do_socialnetworks_for_object)
-register.tag('elsewhere_messengers', do_elsewhere_messengers)
-register.tag('elsewhere_websites', do_elsewhere_websites)
+register.tag('instantmessengers_for_object', do_instantmessengers_for_object)
+register.tag('websites_for_object', do_websites_for_object)
 
 
 

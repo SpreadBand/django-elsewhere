@@ -10,11 +10,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 
+from django.conf import settings
+try:
+    ELSEWHERE_MEDIA_DIR = settings.ELSEWHERE_MEDIA_DIR
+except AttributeError:
+    ELSEWHERE_MEDIA_DIR = '/images/elsewhere/'
 
-GOOGLE_PROFILE_URL = 'http://www.google.com/s2/favicons?domain_url=%s'
-SN_CACHE_KEY = 'elsewhere_sn_data'
-IM_CACHE_KEY = 'elsewhere_im_data'
-
+GOOGLE_FAVICONS_URL = 'http://www.google.com/s2/favicons?domain_url=%s'
 
 class Network(models.Model):
     """ 
@@ -34,27 +36,28 @@ class Network(models.Model):
         Icon URL or link to Google icon service
         """
         if self.icon:
-            return reverse('elsewhere_img', args=[self.icon])
-        return GOOGLE_PROFILE_URL % self.url
+            return "%s/%s/%s" % (settings.MEDIA_URL,
+                                 ELSEWHERE_MEDIA_DIR,
+                                 self.icon)
+        else:
+            return GOOGLE_FAVICONS_URL % self.url
 
     def __unicode__(self):
         return self.name
 
 class SocialNetwork(Network):
+    """
+    A social network
+    """
     class Meta:
         verbose_name_plural = 'social networks'
 
-    def save(self, *args, **kwargs):
-        cache.delete(SN_CACHE_KEY)
-        super(SocialNetwork, self).save(*args, **kwargs)
-
 class InstantMessenger(Network):
+    """
+    An instant messaging network
+    """
     class Meta:
         verbose_name_plural = 'instant messanger networks'
-
-    def save(self, *args, **kwargs):
-        cache.delete(IM_CACHE_KEY)
-        super(InstantMessenger, self).save(*args, **kwargs)
 
 #-- Object Managers for Profiles
 class ProfileManager(models.Manager):
@@ -100,7 +103,7 @@ class NetworkProfile(Profile):
         """
         Profile URL with username
         """
-        return "%s%s" % (self.network.url, self.username)
+        return self.network.url % self.username
 
     def __unicode__(self):
         return "%s profile for %s" % (self.network,
@@ -143,7 +146,7 @@ class WebsiteProfile(Profile):
     @property
     def icon_url(self):
         # No known icons! Just return the Google service URL.
-        return GOOGLE_PROFILE_URL % self.url
+        return GOOGLE_FAVICONS_URL % self.url
 
     def __unicode__(self):
         return self.url
