@@ -16,7 +16,7 @@ try:
 except AttributeError:
     ELSEWHERE_MEDIA_DIR = '/images/elsewhere/'
 
-GOOGLE_FAVICONS_URL = 'http://www.google.com/s2/favicons?domain_url=%s'
+GOOGLE_FAVICONS_URL = 'http://www.google.com/s2/favicons?domain=%s'
 
 class Network(models.Model):
     """ 
