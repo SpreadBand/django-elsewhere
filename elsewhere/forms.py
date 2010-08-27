@@ -5,12 +5,12 @@ from .models import SocialNetworkProfile, InstantMessengerProfile, WebsiteProfil
 class SocialNetworkForm(forms.ModelForm):
     class Meta:
         model = SocialNetworkProfile
-        fields = ('network_id', 'username')
+        fields = ('network', 'username')
 
 class InstantMessengerForm(forms.ModelForm):
     class Meta:
         model = InstantMessengerProfile
-        fields = ('network_id', 'username')
+        fields = ('network', 'username')
 
 class WebsiteForm(forms.ModelForm):
     class Meta:
