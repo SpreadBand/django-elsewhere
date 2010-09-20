@@ -43,7 +43,7 @@ class Network(models.Model):
             return GOOGLE_FAVICONS_URL % self.url
 
     def __unicode__(self):
-        return self.name
+        return u"%s" % self.name
 
 class SocialNetwork(Network):
     """
@@ -106,8 +106,8 @@ class NetworkProfile(Profile):
         return self.network.url % self.username
 
     def __unicode__(self):
-        return "%s profile for %s" % (self.network,
-                                      self.object)
+        return u"%s profile for %s" % (self.network,
+                                       self.object)
     
 
 class SocialNetworkProfile(NetworkProfile):
@@ -149,4 +149,4 @@ class WebsiteProfile(Profile):
         return GOOGLE_FAVICONS_URL % self.url
 
     def __unicode__(self):
-        return self.url
+        return u"%s" % self.url
