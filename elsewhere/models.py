@@ -51,6 +51,7 @@ class SocialNetwork(Network):
     """
     class Meta:
         verbose_name_plural = 'social networks'
+        ordering = ['name']
 
 class InstantMessenger(Network):
     """
@@ -58,6 +59,7 @@ class InstantMessenger(Network):
     """
     class Meta:
         verbose_name_plural = 'instant messanger networks'
+        ordering = ['name']
 
 #-- Object Managers for Profiles
 class ProfileManager(models.Manager):
