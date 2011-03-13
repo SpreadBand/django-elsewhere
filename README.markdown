@@ -11,6 +11,7 @@ Authors:
 * [Leah Culver] (http://leahculver.com)
 * [Chris Drackett] (http://chrisdrackett.com/)
 * [Guillaume Libersat] (http://spreadband.com)
+* [Aziz M. Bookwala] (https://github.com/azizmb)
 
 * Please send feedback to guillaume@spreadband.com
 
@@ -25,7 +26,9 @@ the project or checking out the repository: 'git clone git://github.com/SpreadBa
 
 3. Once the project is on your python path, add 'elsewhere' to your INSTALLED_APPS in settings.py.
 
-4. run python manage.py syncdb from within your project to add the elsewhere database tables and initial data.
+4. Run python manage.py syncdb from within your project to add the elsewhere database tables and initial data.
+
+5. If not using django-staticfiles, copy the media folder to your project media folder
 
 About:
 ------------
@@ -86,8 +89,11 @@ Just use:
 
     {{ profile.network.icon_url }}
 
-To enable the icons in production, you'll need to point your webserver to the icon directory.
+To enable the icons in production, you'll need to point your webserver to the icon directory (or run build_static if using django-staticmedia).
 
+You can also use an icon pack. To do so, just set ELSEWHERE_ICON_PACK in your settings file and copy the icons to the elsewhere media folder.
+Make sure the icons are the same name as specified in the settings or in the default list.
+ 
 This is controlled by the ELSEWHERE_MEDIA_DIR environement variable, which defaults to "/images/elsewhere/".
 The default path to an icon is like: /elsewhere/img/vox.png
 
