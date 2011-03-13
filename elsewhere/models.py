@@ -13,14 +13,20 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 
 try:
-    ELSEWHERE_MEDIA_DIR = settings.ELSEWHERE_MEDIA_DIR
+    ELSEWHERE_ICON_PACK = settings.ELSEWHERE_ICON_PACK
 except AttributeError:
-    ELSEWHERE_MEDIA_DIR = 'elsewhere/images'
+    ELSEWHERE_ICON_PACK = "default"
+    
+try:
+    ELSEWHERE_MEDIA_DIR = settings.ELSEWHERE_MEDIA_DIR+ELSEWHERE_ICON_PACK
+except AttributeError:
+    ELSEWHERE_MEDIA_DIR = 'elsewhere/images/%s'%ELSEWHERE_ICON_PACK
     
 try:
     MEDIA_URL = settings.STATIC_URL
 except AttributeError:
     MEDIA_URL = settings.MEDIA_URL
+
 
 GOOGLE_FAVICONS_URL = 'http://www.google.com/s2/favicons?domain=%s'
 
