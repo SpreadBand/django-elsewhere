@@ -78,7 +78,7 @@ default_social_networks = [
     },
     {
         'name': 'Facebook',
-        'url': 'http://www.facebook.com/profile.php?id=%s',
+        'url': 'http://www.facebook.com/%s',
         'identifier': 'User ID',
         'icon': 'facebook.png',
         'network_type': 'sn'
