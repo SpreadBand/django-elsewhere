@@ -11,10 +11,16 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 
 from django.conf import settings
+
 try:
     ELSEWHERE_MEDIA_DIR = settings.ELSEWHERE_MEDIA_DIR
 except AttributeError:
-    ELSEWHERE_MEDIA_DIR = '/images/elsewhere/'
+    ELSEWHERE_MEDIA_DIR = 'elsewhere/images'
+    
+try:
+    MEDIA_URL = settings.STATIC_URL
+except AttributeError:
+    MEDIA_URL = settings.MEDIA_URL
 
 GOOGLE_FAVICONS_URL = 'http://www.google.com/s2/favicons?domain=%s'
 
@@ -36,7 +42,7 @@ class Network(models.Model):
         Icon URL or link to Google icon service
         """
         if self.icon:
-            return "%s/%s/%s" % (settings.MEDIA_URL,
+            return "%s%s/%s" % ( MEDIA_URL,
                                  ELSEWHERE_MEDIA_DIR,
                                  self.icon)
         else:
