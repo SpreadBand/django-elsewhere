@@ -61,6 +61,10 @@ For sample templates add the path to elsewhere/templates to your TEMPLATE_DIRS s
 To use the template tags:
 -------------------------
 
+Load elsewhere templatetags:
+
+	{% load elsewhere_tags %}
+
 There are three tags available:
 
 * For social networks : socialnetworks_for_object

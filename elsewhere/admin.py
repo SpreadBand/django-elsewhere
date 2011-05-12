@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from models import SocialNetwork
-from models import SocialNetworkProfile, WebsiteProfile, InstantMessengerProfile
+from .models import SocialNetwork
+from .models import SocialNetworkProfile, WebsiteProfile, InstantMessengerProfile
 
 class ProfileAdmin(admin.ModelAdmin):
     pass
