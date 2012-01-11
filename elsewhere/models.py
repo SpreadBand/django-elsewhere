@@ -1,14 +1,9 @@
 from datetime import datetime
 
-from django.db import connection
 from django.db import models
-from django.core.cache import cache
-from django.core.urlresolvers import reverse
-from django.contrib import admin
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
-from django.template.defaultfilters import slugify
 
 from django.conf import settings
 
@@ -70,7 +65,7 @@ class InstantMessenger(Network):
     An instant messaging network
     """
     class Meta:
-        verbose_name_plural = 'instant messanger networks'
+        verbose_name_plural = 'instant messenger networks'
         ordering = ['name']
 
 #-- Object Managers for Profiles
@@ -91,7 +86,7 @@ class ProfileManager(models.Manager):
 #-- Profiles
 class Profile(models.Model):
     """
-    Common profile model pieces. 
+    Common profile model pieces.
     """
     objects = ProfileManager()
 
@@ -99,7 +94,8 @@ class Profile(models.Model):
         abstract = True
 
     date_added = models.DateTimeField(_('date added'), auto_now_add=True)
-    date_verified = models.DateTimeField(_('date verified'), default=datetime.now)
+    date_verified = models.DateTimeField(_('date verified'),
+        default=datetime.now)
     is_verified = models.BooleanField(default=False)
 
 
@@ -128,7 +124,8 @@ class SocialNetworkProfile(NetworkProfile):
     """
     A profile for a social network
     """
-    content_type = models.ForeignKey(ContentType, related_name='social_network_profiles')
+    content_type = models.ForeignKey(ContentType,
+        related_name='social_network_profiles')
     object_id = models.PositiveIntegerField(db_index=True)
     object = generic.GenericForeignKey('content_type', 'object_id')
 
@@ -139,7 +136,8 @@ class InstantMessengerProfile(NetworkProfile):
     """
     A profile for an instant messenging network
     """
-    content_type = models.ForeignKey(ContentType, related_name='instant_messenger_profiles')
+    content_type = models.ForeignKey(ContentType,
+        related_name='instant_messenger_profiles')
     object_id = models.PositiveIntegerField(db_index=True)
     object = generic.GenericForeignKey('content_type', 'object_id')
 
@@ -150,7 +148,8 @@ class WebsiteProfile(Profile):
     """
     A profile for an external, generic website
     """
-    content_type = models.ForeignKey(ContentType, related_name='website_profiles')
+    content_type = models.ForeignKey(ContentType,
+        related_name='website_profiles')
     object_id = models.PositiveIntegerField(db_index=True)
     object = generic.GenericForeignKey('content_type', 'object_id')
 
